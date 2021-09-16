@@ -24,7 +24,7 @@ Install the package with R. This compiles and properly install the package.
 R CMD INSTALL --preclean .
 ```
 
-You can also build the project with debug symbols.
+You can also build the project with debug symbols by setting (exporting) the `UFO_DEBUG` environmental variable to `1`.
 
 ```
 UFO_DEBUG=1 R CMD INSTALL --preclean .
