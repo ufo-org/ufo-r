@@ -27,5 +27,5 @@ R CMD INSTALL --preclean .
 You can also build the project with debug symbols.
 
 ```
-R CMD INSTALL --preclean .
+UFO_DEBUG=1 R CMD INSTALL --preclean .
 ```
