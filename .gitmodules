@@ -1,0 +1,3 @@
+[submodule "ufo-c"]
+	path = ufo-c
+	url = https://github.com/ufo-org/ufo-c.git
