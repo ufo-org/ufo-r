@@ -7,7 +7,7 @@
 #include "ufos.h"
 #include "R_ext.h"
 //#include "mappedMemory/userfaultCore.h"
-#include "ufos_c.h"
+#include "ufo_c/target/ufo_c.h"
 
 #include "make_sure.h"
 
