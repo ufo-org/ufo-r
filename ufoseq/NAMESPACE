@@ -1,2 +1,0 @@
-useDynLib(ufoseq, .registration = TRUE, .fixes = "")
-export(ufo_seq)
