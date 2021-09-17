@@ -7,7 +7,7 @@ UFO R API.
 Before building, retrievew the code of a submodule:
 
 ```bash
-git submodule update --init
+git submodule update --init --recursive
 ```
 
 To update the submodule, pull it.
