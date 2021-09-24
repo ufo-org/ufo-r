@@ -75,16 +75,16 @@ void* __ufo_alloc(R_allocator_t *allocator, size_t size) {
     		  "Sizes don't match at ufo_alloc (%li vs expected %li).", size - sexp_header_size - sexp_metadata_size,
 			  	  	  	  	  	  	  	  	  	  	  	  	  	  	   source->vector_size *  source->element_size);
 
-    UfoParameters * parameters = (UfoParameters *) malloc(sizeof(UfoParameters));
-    parameters->header_size = sexp_header_size + sexp_metadata_size;
-    parameters->element_size = __get_stride_from_type_or_die(source->vector_type);
-    parameters->element_ct = source->vector_size;
-    parameters->min_load_ct = source->min_load_count;
-    parameters->read_only = source->read_only;
-    parameters->populate_data = source->data;
-    parameters->populate_fn = source->population_function;
+    UfoParameters parameters;
+    parameters.header_size = sexp_header_size + sexp_metadata_size;
+    parameters.element_size = __get_stride_from_type_or_die(source->vector_type);
+    parameters.element_ct = source->vector_size;
+    parameters.min_load_ct = source->min_load_count;
+    parameters.read_only = source->read_only;
+    parameters.populate_data = source->data;
+    parameters.populate_fn = source->population_function;
 
-    UfoObj object = ufo_new_object (&__ufo_system, parameters);
+    UfoObj object = ufo_new_object (&__ufo_system, &parameters);
 
     if (ufo_is_error(&object)) {
         Rf_error("Could not create UFO");
