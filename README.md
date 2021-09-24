@@ -14,7 +14,7 @@ To update the submodule, pull it.
 
 ```bash
 cd src/ufo-c
-git pull
+git pull origin main
 cd ../..
 ```
 

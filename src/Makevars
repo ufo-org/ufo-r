@@ -15,7 +15,7 @@ else
 	UFO_C_LIB_PATH="$(UFO_C_PATH)/target/release"
 endif
 
-PKG_LIBS = -Wl,--no-as-needed -lpthread -lrt -ldl -lm -lstdc++ $(UFO_C_LIB_PATH)/libufos_c.a
+PKG_LIBS = -Wl,--no-as-needed -lpthread -lrt -ldl -lm -lstdc++ $(UFO_C_LIB_PATH)/libufo_c.a
 ifeq (${UFO_DEBUG}, 1)
 	PKG_CFLAGS = -DMAKE_SURE -Og -ggdb -fPIC -Wall -Werror -DNDEBUG -I$(UFO_C_PATH)/target/
 else
