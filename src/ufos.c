@@ -74,17 +74,19 @@ void* __ufo_alloc(R_allocator_t *allocator, size_t size) {
     make_sure((size - sexp_header_size - sexp_metadata_size) >= (source->vector_size *  source->element_size), Rf_error,
     		  "Sizes don't match at ufo_alloc (%li vs expected %li).", size - sexp_header_size - sexp_metadata_size,
 			  	  	  	  	  	  	  	  	  	  	  	  	  	  	   source->vector_size *  source->element_size);
+    UfoParameters params = {
+        .header_size = sexp_header_size + sexp_metadata_size,
+        .element_size = __get_stride_from_type_or_die(source->vector_type),
+        .min_load_ct = source->min_load_count,
+        .read_only = source->read_only,
+        .element_ct = source->vector_size,
+        .populate_data = source->data,
+        .populate_fn = source->population_function,
+        .writeback_listener = NULL,
+        .writeback_listener_data = NULL,
+    };
 
-    UfoObj object = ufo_new_no_prototype(
-        &__ufo_system,
-        sexp_header_size + sexp_metadata_size,
-        __get_stride_from_type_or_die(source->vector_type),
-        source->min_load_count,
-        source->read_only,
-        source->vector_size,
-        source->data, // populate data
-        source->population_function
-    );
+    UfoObj object = ufo_new_object(&__ufo_system, &params);
 
 
     if (ufo_is_error(&object)) {
