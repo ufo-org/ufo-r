@@ -38,7 +38,7 @@ git submodule update --init --recursive
 To update the submodule, pull it.
 
 ```bash
-cd src/ufo-c && git pull origin main && cd ../..
+cd src/ufo_c && git pull origin main && cargo update && cd ../..
 ```
 
 Install the package with R. This compiles and properly install the package.
