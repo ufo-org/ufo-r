@@ -51,8 +51,13 @@ SEXP ufo_new_multidim(ufo_source_t* source);
 // Auxiliary functions.
 SEXP is_ufo(SEXP x);
 SEXPTYPE ufo_type_to_vector_type (ufo_vector_type_t);
+ufo_vector_type_t vector_type_to_ufo_type (SEXPTYPE sexp_type);
 
 // Function types for R dynloader.
 typedef SEXP (*is_ufo_t)(SEXP);
 typedef SEXP (*ufo_new_t)(ufo_source_t*);
 typedef SEXPTYPE (*ufo_type_to_vector_type_t)(ufo_vector_type_t);
+typedef ufo_vector_type_t (*vector_type_to_ufo_type_t)(SEXPTYPE);
+typedef uint32_t (*element_width_from_type_or_die_t)(SEXPTYPE);
+
+// TODO clean up the interface.

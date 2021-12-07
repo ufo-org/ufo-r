@@ -130,6 +130,33 @@ SEXPTYPE ufo_type_to_vector_type (ufo_vector_type_t ufo_type) {
     }
 }
 
+ufo_vector_type_t vector_type_to_ufo_type (SEXPTYPE sexp_type) {
+    switch (sexp_type) {
+        case CHARSXP: return UFO_CHAR;
+        case LGLSXP:  return UFO_LGL;
+        case INTSXP:  return UFO_INT;
+        case REALSXP: return UFO_REAL;
+        case CPLXSXP: return UFO_CPLX;
+        case RAWSXP:  return UFO_RAW;
+        case STRSXP:  return UFO_STR;
+        default:       Rf_error("Cannot convert SEXPTYPE=%i to ufo_vector_type_t", sexp_type);
+                       return -1;
+    }
+}
+
+uint32_t element_width_from_type_or_die(SEXPTYPE type) {
+    switch(type) {
+        case CHARSXP: return strideOf(Rbyte);
+        case LGLSXP:  return strideOf(Rboolean);
+        case INTSXP:  return strideOf(int);
+        case REALSXP: return strideOf(double);
+        case CPLXSXP: return strideOf(Rcomplex);
+        case RAWSXP:  return strideOf(Rbyte);
+        case STRSXP:  return strideOf(SEXP);
+        default:      Rf_error("Cannot calculate element width for vector type: %d\n", type);
+    }
+}
+
 R_allocator_t* __ufo_new_allocator(ufo_source_t* source) {
     // Initialize an allocator.
     R_allocator_t* allocator = (R_allocator_t*) malloc(sizeof(R_allocator_t));
