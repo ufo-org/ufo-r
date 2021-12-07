@@ -22,7 +22,7 @@ else
 	PKG_CFLAGS = -DMAKE_SURE -O2       -fpic -Wall -Werror -DNDEBUG -I$(UFO_C_PATH)/target/
 endif
 
-SOURCES_C = init.c ufos.c R_ext.c
+SOURCES_C = init.c ufos.c R_ext.c bad_strings.c
 
 OBJECTS = $(SOURCES_C:.c=.o)
 
