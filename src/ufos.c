@@ -10,6 +10,7 @@
 #include "ufo_c/target/ufo_c.h"
 
 #include "make_sure.h"
+#include "bad_strings.h"
 
 UfoCore __ufo_system;
 int __framework_initialized = 0;
@@ -61,6 +62,7 @@ uint32_t __get_stride_from_type_or_die(ufo_vector_type_t type) {
         case UFO_CPLX: return strideOf(Rcomplex);
         case UFO_RAW:  return strideOf(Rbyte);
         case UFO_STR:  return strideOf(SEXP);
+        case UFO_VEC:  return strideOf(SEXP);
         default:       Rf_error("Cannot derive stride for vector type: %d\n", type);
     }
 }
@@ -130,6 +132,33 @@ SEXPTYPE ufo_type_to_vector_type (ufo_vector_type_t ufo_type) {
     }
 }
 
+ufo_vector_type_t vector_type_to_ufo_type (SEXPTYPE sexp_type) {
+    switch (sexp_type) {
+        case CHARSXP: return UFO_CHAR;
+        case LGLSXP:  return UFO_LGL;
+        case INTSXP:  return UFO_INT;
+        case REALSXP: return UFO_REAL;
+        case CPLXSXP: return UFO_CPLX;
+        case RAWSXP:  return UFO_RAW;
+        case STRSXP:  return UFO_STR;
+        default:       Rf_error("Cannot convert SEXPTYPE=%i to ufo_vector_type_t", sexp_type);
+                       return -1;
+    }
+}
+
+uint32_t element_width_from_type_or_die(SEXPTYPE type) {
+    switch(type) {
+        case CHARSXP: return strideOf(Rbyte);
+        case LGLSXP:  return strideOf(Rboolean);
+        case INTSXP:  return strideOf(int);
+        case REALSXP: return strideOf(double);
+        case CPLXSXP: return strideOf(Rcomplex);
+        case RAWSXP:  return strideOf(Rbyte);
+        case STRSXP:  return strideOf(SEXP);
+        default:      Rf_error("Cannot calculate element width for vector type: %d\n", type);
+    }
+}
+
 R_allocator_t* __ufo_new_allocator(ufo_source_t* source) {
     // Initialize an allocator.
     R_allocator_t* allocator = (R_allocator_t*) malloc(sizeof(R_allocator_t));
@@ -165,6 +194,19 @@ void __reset_vector(SEXP vector) {
 	 ufo_reset(&object);
 }
 
+SEXP ufo_alloc(SEXPTYPE type, R_xlen_t size, R_allocator_t* allocator) {
+    switch (type) {
+        // Using bad strings to create out-of-core character vectors.
+        case CHARSXP: // TODO require a compile flag for bad strings
+        Rf_warning("Warning, UFO is producing an out of core character vector.");
+        return allocBadCharacter3(size, allocator);
+
+        // The typical case
+        default:
+        return allocVector3(type, size, allocator);
+    }
+}
+
 SEXP ufo_new(ufo_source_t* source) {
     // Check type.
     SEXPTYPE type = ufo_type_to_vector_type(source->vector_type);
@@ -176,7 +218,7 @@ SEXP ufo_new(ufo_source_t* source) {
     R_allocator_t* allocator = __ufo_new_allocator(source);
 
     // Create a new vector of the appropriate type using the allocator.
-    SEXP ufo = PROTECT(allocVector3(type, source->vector_size, allocator));
+    SEXP ufo = PROTECT(ufo_alloc(type, source->vector_size, allocator));
 
     // Workaround for scalar vectors ignoring custom allocator:
     // Pre-load the data in, at least it'll work as read-only.
