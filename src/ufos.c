@@ -95,6 +95,7 @@ uint32_t __get_stride_from_type_or_die(ufo_vector_type_t type) {
     }
 }
 
+
 void* __ufo_alloc(R_allocator_t *allocator, size_t size) {
     ufo_source_t* source = (ufo_source_t*) allocator->data;
 
@@ -112,8 +113,8 @@ void* __ufo_alloc(R_allocator_t *allocator, size_t size) {
         .element_ct = source->vector_size,
         .populate_data = source->data,
         .populate_fn = source->population_function,
-        .writeback_listener = NULL,
-        .writeback_listener_data = NULL,
+        .writeback_listener = source->update_function,
+        .writeback_listener_data = source->data,
     };
 
     UfoObj object = ufo_new_object(&__ufo_system, &params);
