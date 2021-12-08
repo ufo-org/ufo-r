@@ -8,10 +8,10 @@ UFO_C_PATH=ufo_c
 # cargo will generate the output binaries for ufo-c either in a debug
 # subdirectory or a release subdirectory. We remember which.
 ifeq (${UFO_DEBUG}, 1)
-	CARGOFLAGS=+nightly build
+	CARGOFLAGS=build
 	UFO_C_LIB_PATH="$(UFO_C_PATH)/target/debug"
 else
-	CARGOFLAGS=+nightly build --release
+	CARGOFLAGS=build --release
 	UFO_C_LIB_PATH="$(UFO_C_PATH)/target/release"
 endif
 
@@ -22,7 +22,7 @@ else
 	PKG_CFLAGS = -DMAKE_SURE -O2       -fpic -Wall -Werror -DNDEBUG -I$(UFO_C_PATH)/target/
 endif
 
-SOURCES_C = init.c ufos.c R_ext.c
+SOURCES_C = init.c ufos.c R_ext.c bad_strings.c
 
 OBJECTS = $(SOURCES_C:.c=.o)
 
