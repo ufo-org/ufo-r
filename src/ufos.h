@@ -20,10 +20,17 @@ typedef enum {
 	UFO_VEC  = VECSXP,
 } ufo_vector_type_t;
 
-// These are all copied over from UFO C headers:
-typedef int32_t (*UfoPopulateCallout)(void*, uintptr_t, uintptr_t, unsigned char*);
+enum UfoWriteListenerEvent_Tag;
 
-typedef void (*UfoWriteback)(void*, bool reset, uintptr_t, uintptr_t, unsigned char*);
+struct Writeback_Body;
+typedef struct Writeback_Body Writeback_Body;
+
+struct UfoWriteListenerEvent;
+typedef struct UfoWriteListenerEvent UfoWriteListenerEvent;
+
+typedef void (*UfoWritebackListener)(void *data, UfoWriteListenerEvent event);
+
+typedef int32_t (*UfoPopulateCallout)(void*, uintptr_t, uintptr_t, unsigned char*);
 
 // Function types for ufo_source_t
 typedef void (*ufo_destructor_t)(void*);
@@ -32,7 +39,7 @@ typedef void (*ufo_destructor_t)(void*);
 typedef struct {
     void                 *data;
     UfoPopulateCallout    population_function;
-    UfoWriteback          update_function;
+    UfoWritebackListener  update_function;
     ufo_destructor_t      destructor_function;
     ufo_vector_type_t     vector_type;        
     /*R_len_t*/size_t     vector_size;

@@ -67,6 +67,7 @@ uint32_t __get_stride_from_type_or_die(ufo_vector_type_t type) {
     }
 }
 
+
 void* __ufo_alloc(R_allocator_t *allocator, size_t size) {
     ufo_source_t* source = (ufo_source_t*) allocator->data;
 
