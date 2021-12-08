@@ -6,7 +6,7 @@
 // List of functions provided by the package.
 static const R_CallMethodDef CallEntries[] __attribute__ ((unused)) = {
     // Start up and shutdown the system.
-    {"ufo_initialize", (DL_FUNC) &ufo_initialize, 0},
+    {"ufo_initialize", (DL_FUNC) &ufo_initialize, 2},
     {"ufo_shutdown", (DL_FUNC) &ufo_shutdown, 0},
 	{"is_ufo", (DL_FUNC) &is_ufo, 1},
 

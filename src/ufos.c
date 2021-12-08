@@ -26,15 +26,43 @@ SEXP ufo_shutdown() {
     return R_NilValue;
 }
 
-SEXP ufo_initialize() {
+SEXP ufo_initialize(SEXP/*INTSXP*/ high_sexp, SEXP/*INTSXP*/ low_sexp) {
     if (!__framework_initialized) {
         __framework_initialized = 1;
 
     // ufo_begin_log(); // very verbose rust logging
 
+        if(TYPEOF(high_sexp) != INTSXP) {
+            Rf_error("Invalid type for high water mark: %s", type2char(TYPEOF(high_sexp)));
+        }
+
+        if(TYPEOF(low_sexp) != INTSXP) {
+            Rf_error("Invalid type for high water mark: %s", type2char(TYPEOF(low_sexp)));
+        }
+
+        if (XLENGTH(high_sexp) == 0) {
+            Rf_error("No high water mark value: vector of length zero");
+        }
+
+        if (XLENGTH(low_sexp) == 0) {
+            Rf_error("No low water mark value: vector of length zero");
+        }
+
+        int high_mb = INTEGER_ELT(high_sexp, 0);
+        int low_mb = INTEGER_ELT(low_sexp, 0);
+
+        if (XLENGTH(high_sexp) > 1) {
+            Rf_warning("Multiple values provided for high water mark value, using first one (%i)", high_mb);
+        }
+
+        if (XLENGTH(low_sexp) > 1) {
+            Rf_warning("Multiple values provided for low water mark value, using first one (%i)", low_mb);
+        }
+
         // Actual initialization
-        size_t high = 2l * 1024 * 1024 * 1024;
-        size_t low = 1l * 1024 * 1024 * 1024;
+        size_t high = 1024L * 1024 * high_mb;
+        size_t low = 1024 * 1024 * low_mb;
+
         __ufo_system = ufo_new_core("/tmp/", high, low);
         if (ufo_core_is_error(&__ufo_system)) {
             Rf_error("Error initializing the UFO framework");
