@@ -113,7 +113,7 @@ void* __ufo_alloc(R_allocator_t *allocator, size_t size) {
         .element_ct = source->vector_size,
         .populate_data = source->data,
         .populate_fn = source->population_function,
-        .writeback_listener = source->update_function,
+        .writeback_listener = source->writeback_function,
         .writeback_listener_data = source->data,
     };
 

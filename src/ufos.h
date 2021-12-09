@@ -39,7 +39,7 @@ typedef void (*ufo_destructor_t)(void*);
 typedef struct {
     void                 *data;
     UfoPopulateCallout    population_function;
-    UfoWritebackListener  update_function;
+    UfoWritebackListener  writeback_function;
     ufo_destructor_t      destructor_function;
     ufo_vector_type_t     vector_type;        
     /*R_len_t*/size_t     vector_size;
