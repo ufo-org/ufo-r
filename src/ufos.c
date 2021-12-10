@@ -95,9 +95,12 @@ uint32_t __get_stride_from_type_or_die(ufo_vector_type_t type) {
     }
 }
 
-
 void* __ufo_alloc(R_allocator_t *allocator, size_t size) {
     ufo_source_t* source = (ufo_source_t*) allocator->data;
+    
+    // Make a duplicate of source for writeback.
+    ufo_source_t* writeback_source = (ufo_source_t*) malloc(sizeof(ufo_source_t));
+    writeback_source = memcpy(writeback_source, source, sizeof(ufo_source_t));
 
     size_t sexp_header_size = sizeof(SEXPREC_ALIGN);
     size_t sexp_metadata_size = sizeof(R_allocator_t);
@@ -119,7 +122,6 @@ void* __ufo_alloc(R_allocator_t *allocator, size_t size) {
 
     UfoObj object = ufo_new_object(&__ufo_system, &params);
 
-
     if (ufo_is_error(&object)) {
         Rf_error("Could not create UFO");
     }
@@ -137,13 +139,13 @@ void __ufo_free(R_allocator_t *allocator, void *ptr) {
     if (ufo_is_error(&object)) {
         free_error(ptr);
         return;
-    }
+    }   
+    ufo_free(object);
     ufo_source_t* source = (ufo_source_t*) allocator->data;
     source->destructor_function(source->data);
-    ufo_free(object);
     if (source->dimensions != NULL) {
         free(source->dimensions);
-    }
+    }    
     free(source);
 }
 

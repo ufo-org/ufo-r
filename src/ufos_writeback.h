@@ -5,6 +5,7 @@
 typedef enum UfoWriteListenerEvent_Tag {
   Writeback,
   Reset,
+  UfoWBDestroy,
 } UfoWriteListenerEvent_Tag;
 
 typedef struct Writeback_Body {

@@ -29,7 +29,7 @@ sysctl -w vm.unprivileged_userfaultfd=1
 
 ## Building
 
-Before building, retrievew the code of a submodule:
+Before building, retrieve the code of a submodule:
 
 ```bash
 git submodule update --init --recursive
