@@ -9,6 +9,7 @@ static const R_CallMethodDef CallEntries[] __attribute__ ((unused)) = {
     {"ufo_initialize", (DL_FUNC) &ufo_initialize, 2},
     {"ufo_shutdown", (DL_FUNC) &ufo_shutdown, 0},
 	{"is_ufo", (DL_FUNC) &is_ufo, 1},
+    {"ufo_new", (DL_FUNC), &ufo_new_sandbox, 8},
 
     // Terminates the function list. Necessary.
     {NULL, NULL, 0} 

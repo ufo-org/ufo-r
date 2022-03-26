@@ -310,3 +310,100 @@ SEXP is_ufo(SEXP x) {
 	return response;
 }
 
+typedef struct {
+    u_int64_t population_id;
+    u_int64_t writeback_id;
+    u_int64_t finalizer_id;
+    u_int64_t user_data_id;
+} sandbox_data_t;
+
+int32_t populate_in_sandbox(void *user_data, uintptr_t start, 
+                            uintptr_t end, unsigned char *target) {
+
+    sandbox_data_t *info = (sandbox_data_t *) user_data;
+
+    // Call remote
+    //info->population_id
+
+    // Get result and plug into memory
+}
+ 
+void writeback_in_sandbox(void *user_data, UfoWriteListenerEvent event) {
+
+    sandbox_data_t *info = (sandbox_data_t *) user_data;
+
+    // Call remote    
+    //info->writeback_id
+}
+
+void free_in_sandbox(void *user_data) {
+    // Call remote
+    //info->finalizer_id
+    //info->user_data_id
+
+    // Clean up locally
+    free(user_data);
+}
+
+SEXP/*<T: VECSXP>*/ ufo_new_sandbox(            // R-callable wrapper from ufo_new, wraps function for sandboxed execution
+    SEXP/*FUNSXP*/         population_sexp,     // (..user_data) -> <T: VECSXP>
+    SEXP/*FUNSXP|NILSXP*/  writeback_sexp,      // (memory: <T: VECSXP>, ..user_data) -> NILSXP
+    SEXP/*FUNSXP|NILSXP*/  finalizer_sexp,      // (..user_data) -> NILSXP
+    SEXP/*<T: VECSXP>*/    prototype_sexp,      // length: 0 (not enforced) which indicates the type the resulting UFO is
+    SEXP/*INTSXP|REALSXP*/ length_sexp,         // length: 1, converted to R_xlen_t
+    SEXP/*LISTSXP*/        user_data_sexp,      // passed to population, writeback, finalizer via ...
+    SEXP/*INTSXP*/         min_load_count_sexp, // length: 1
+    SEXP/*LGLSXP*/         read_only_sexp,      // length: 1
+) {
+    // Determine UFO vector type.
+    SEXPTYPE sexp_type = TYPEOF(prototype_sexp);
+    switch (vector_type != CHARSXP && vector_type != LGLSXP 
+         && vector_type != INTSXP  && vector_type != REALSXP 
+         && vector_type != CPLXSXP && vector_type != RAWSXP 
+         && vector_type != STRSXP) {
+        Rf_error("Cannot create UFO vector of type ", type2char(vector_type));
+    }
+    ufo_vector_type_t vector_type = vector_type_to_ufo_type(sexp_type);
+
+    // Determine sizes
+    size_t element_size = __get_element_size(vector_type);
+    size_t vector_size = __extract_R_xlen_t_or_die(length_sexp);
+
+    // Auxiliaries
+    int min_load_count = __extract_int_or_die(min_load_count_sexp);
+    bool read_only = __extract_boolean_or_die(read_only_sexp);
+
+    // TODO
+    // Start and init the remote if not started
+    // TODO: also remember to shutdown later
+
+    // Register functions and data with sandbox
+    u_int64_t population_id = 0; // TODO 
+    u_int64_t writeback_id = 0;  // TODO 
+    u_int64_t finalizer_id = 0;  // TODO 
+    u_int64_t user_data_id = 0;  // TODO 
+
+    // Allocate and populate the structs
+    sandbox_data_t *info = (sandbox_data_t *) malloc(sizeof(sandbox_data_t));
+    info->population_id = population_id;
+    info->writeback_id = writeback_id;
+    info->finalizer_id = finalizer_id;
+    info->user_data_id = user_data_id;
+
+    ufo_source_t* source = (ufo_source_t*) malloc(sizeof(ufo_source_t));
+    source->data = info;
+    source->population_function = populate_in_sandbox;
+    source->writeback_function = writeback_in_sandbox;
+    source->destructor_function = free_in_sandbox;        
+    source->vector_type = vector_type;
+    source->vector_size = vector_size;
+    source->element_size = element_size;
+    source->dimensions = NULL;
+    source->dimensions_length = 0;
+    source->min_load_count = min_load_count;
+    source->read_only = read_only;  
+
+    // Create UFO and done
+    return ufo_new(source);
+}
+

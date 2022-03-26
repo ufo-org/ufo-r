@@ -80,9 +80,19 @@ typedef struct {
 SEXP ufo_shutdown();
 SEXP ufo_initialize();
 
-// Constructor
-SEXP ufo_new(ufo_source_t*); // have `ufo_new` copy and consume the struct, so that it can free it automatrically
+// Constructors
+SEXP ufo_new(ufo_source_t*); // have `ufo_new` copy and consume the struct, so that it can free it automatically
 SEXP ufo_new_multidim(ufo_source_t* source);
+SEXP/*<T: VECSXP>*/ ufo_new_r(             // R-callable wrapper from ufo_new
+    SEXP/*FUNSXP*/         population,     // (..user_data) -> <T: VECSXP>
+    SEXP/*FUNSXP|NILSXP*/  writeback,      // (memory: <T: VECSXP>, ..user_data) -> NILSXP
+    SEXP/*FUNSXP|NILSXP*/  finalizer,      // (..user_data) -> NILSXP
+    SEXP/*<T: VECSXP>*/    prototype,      // length: 0 (not enforced) which indicates the type the resulting UFO is
+    SEXP/*INTSXP|REALSXP*/ length,         // length: 1, converted to R_xlen_t
+    SEXP/*LISTSXP*/        user_data,      // passed to population, writeback, finalizer via ...
+    SEXP/*INTSXP*/         min_load_count, // length: 1
+    SEXP/*LGLSXP*/         read_only,      // length: 1
+); 
 
 // Auxiliary functions.
 SEXP is_ufo(SEXP x);

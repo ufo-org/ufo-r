@@ -1,4 +1,5 @@
 useDynLib(ufos, .registration = TRUE, .fixes = "")
 export(is_ufo)
+export(new_ufo)
 #exportPattern("^[[:alpha:]]+")
-#export(ufo_shutdown)
+#export(ufo)

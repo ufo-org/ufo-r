@@ -25,5 +25,72 @@
 
 # Checks whether a vector is a UFO.
 is_ufo <- function(x) {
-	.Call("is_ufo", x)
+  .Call("is_ufo", x)
+}
+
+# Creates a new UFO with a custom populate function (executed in a sandbox)
+ufo <- function(type, length, populate, writeback, finalizer, ...,
+                read_only = FALSE, min_load_count = 0, add_class = TRUE) {
+
+  # Parameter check
+  if (!is.character(type) ||
+       (type != "double"  && type && "character" && type != "raw" &&
+        type != "logical" && type && "complex"   && type != "integer")) {
+
+    stop("Provide type of UFO as a character string, one of: ",
+         "'double', 'character', 'raw', 'logical', 'complex', 'integer' ",
+         "(received: ", type, ")");
+  }
+  prototype <- vector(mode = type, length = 0)
+
+  if (!is.numeric(length) && !is.integer(length)) {
+    stop("Provide length of UFO as either a numeric or integer value ",
+         "(received object of type ", typeof(length), ")");
+  }
+
+  if (!is.function(populate)) {
+    stop("Expected `populate_fun` to be a function, ",
+         "but found ", typeof(populate_fun))
+  }
+
+  if (!missing(writeback) && !is.function(writeback)) {
+    stop("Expected `writeback_fun` to be a function ",
+         "or not provided at all, but found ", typeof(writeback))
+  }
+  if (missing(writeback)) {
+    writeback <- NULL
+  }
+
+  if (!missing(finalizer) && !is.function(finalizer)) {
+    stop("Expected `finalizer_fun` to be a function ",
+         "or not provided at all, but found ", typeof(finalizer))
+  }
+  if (missing(finalizer)) {
+    finalizer <- NULL
+  }
+
+  if (!is.numeric(min_load_count) && !is.integer(min_load_count)) {
+    stop("Provide `min_load_count` as either a numeric or integer value ",
+         "(received object of type ", typeof(min_load_count), ")");
+  }
+  min_load_count <- as.integer(min_load_count)
+
+  if (!missing(add_class) && !is.logical(add_class)) {
+    stop("Provide `add_class` as a logical value or not at all ",
+         "(received object of type ", typeof(add_class), ")");
+  }
+
+  # Construct a pairlist out of remaining parameters, this constitutes user
+  # data sent to remote sandbox
+  user_data <- pairlist(...);
+
+  # Construct UFO
+  ufo <- .Call("ufo_new", populate, writeback, finalizer, prototype, length,
+               user_data, min_load_count, read_only)
+
+  # Add class, if desired
+  if (!missing(finalizer) && add_class) {
+    class(vector) <- "ufo"
+  }
+  return(ufo);
 }
