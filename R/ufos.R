@@ -25,5 +25,15 @@
 
 # Checks whether a vector is a UFO.
 is_ufo <- function(x) {
+  if (any(names(sessionInfo()$otherPkgs) == "ufosandbox")) {
+    if (ufosandbox:::is_ufo(x)) {
+      return(TRUE)
+    }
+  }
+  if (any(names(sessionInfo()$otherPkgs) == "ufovectors")) {
+    if (ufovectors:::is_ufo(x)) {
+      return(TRUE)
+    }
+  }
 	.Call("is_ufo", x)
 }
