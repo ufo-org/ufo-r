@@ -95,6 +95,40 @@ uint32_t __get_stride_from_type_or_die(ufo_vector_type_t type) {
     }
 }
 
+typedef struct writeback_wrapper_t {
+    bool reset_already_happened;
+    void *data;   
+    UfoWritebackListener function;
+} writeback_wrapper_t;
+
+writeback_wrapper_t *writeback_wrapper_from(UfoWritebackListener function, void *data) {
+    writeback_wrapper_t * wrapper_data = (writeback_wrapper_t *) malloc(sizeof(writeback_wrapper_t));
+    wrapper_data->function = function;
+    wrapper_data->data = data;
+    wrapper_data->reset_already_happened = false;
+    return wrapper_data;
+}
+
+void writeback_wrapper_free(writeback_wrapper_t *wrapper_data) {
+    free(wrapper_data);
+}
+
+void writeback_wrapper_function(void *data, UfoWriteListenerEvent event) {        
+    writeback_wrapper_t *wrapper_data = (writeback_wrapper_t *) data;
+    switch (event.tag) {
+        case Writeback: 
+            if (wrapper_data->reset_already_happened) {
+                wrapper_data->function(wrapper_data->data, event); 
+            }
+            return;
+        case Reset: 
+            wrapper_data->reset_already_happened = true; 
+            return;
+        case UfoWBDestroy: 
+            return;        
+    }
+}
+
 void* __ufo_alloc(R_allocator_t *allocator, size_t size) {
     ufo_source_t* source = (ufo_source_t*) allocator->data;
     
@@ -108,6 +142,13 @@ void* __ufo_alloc(R_allocator_t *allocator, size_t size) {
     make_sure((size - sexp_header_size - sexp_metadata_size) >= (source->vector_size *  source->element_size), Rf_error,
     		  "Sizes don't match at ufo_alloc (%li vs expected %li).", size - sexp_header_size - sexp_metadata_size,
 			  	  	  	  	  	  	  	  	  	  	  	  	  	  	   source->vector_size *  source->element_size);
+
+    // Special treatment for strings, because they are overrriden during allocation.
+    bool wrap_writeback = source->vector_type == UFO_STR && source->writeback_function != NULL;
+    void *writeback_data = wrap_writeback ? writeback_wrapper_from(source->writeback_function, source->data) : source->data;
+    UfoWritebackListener writeback_listener = wrap_writeback ? writeback_wrapper_function : source->writeback_function;
+    source->reserved = wrap_writeback ? writeback_data : NULL; 
+
     UfoParameters params = {
         .header_size = sexp_header_size + sexp_metadata_size,
         .element_size = __get_stride_from_type_or_die(source->vector_type),
@@ -116,8 +157,8 @@ void* __ufo_alloc(R_allocator_t *allocator, size_t size) {
         .element_ct = source->vector_size,
         .populate_data = source->data,
         .populate_fn = source->population_function,
-        .writeback_listener = source->writeback_function,
-        .writeback_listener_data = source->data,
+        .writeback_listener = writeback_listener,
+        .writeback_listener_data = writeback_data,
     };
 
     UfoObj object = ufo_new_object(&__ufo_system, &params);
@@ -145,7 +186,10 @@ void __ufo_free(R_allocator_t *allocator, void *ptr) {
     source->destructor_function(source->data);
     if (source->dimensions != NULL) {
         free(source->dimensions);
-    }    
+    }
+    if (source->reserved != NULL) {
+        writeback_wrapper_free(source->reserved);
+    }
     free(source);
 }
 

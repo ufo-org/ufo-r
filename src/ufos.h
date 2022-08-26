@@ -46,8 +46,9 @@ typedef struct {
     size_t                element_size;
     int                  *dimensions;        // because they are `ints` in R
     size_t                dimensions_length;
-    int32_t               min_load_count;
+    int32_t               min_load_count;    
     bool                  read_only;
+    void *                reserved;
 } ufo_source_t;
 
 // TODO convenience constructors

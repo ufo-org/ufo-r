@@ -3,7 +3,9 @@
         "*.h": "c",
         "*.c": "c",
         "type_traits": "c",
-        "compare": "c"
+        "compare": "c",
+        "*.tcc": "c",
+        "functional": "c"
     },
     "R.dir": "/opt/R-4.1.0",
     "R.cmd": "${config:R.dir}/bin/R" ,
